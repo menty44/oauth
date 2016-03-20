@@ -1,0 +1,61 @@
+<div class="row">
+    <div class="profile_wrapper">
+        <div class="profile_photo_box" id="photo_box">
+            <img ng-src="/getProfilePicture/{{id}}" id="profilePic"/>
+        </div>
+        <div class="user_data_box">
+            <div class="first-row">
+                <h2>{{name}}</h2>
+                <div class="edit_btn" ng-click="toggleModal()">EDIT PROFILE</div>
+            </div>
+            <div class="second-row">
+                <div class="description">
+                    {{desc}}
+                    <a ng-href="http://{{website}}">{{website}}</a>
+                </div>
+            </div>
+            <div class="third-row">
+                <div class="posts_num"><span class="bold">1</span> posts</div>
+                <div class="followers_num"><span class="bold">2</span> followers</div>
+                <div class="following_num"><span class="bold">3</span> following</div>
+            </div>
+        </div>
+    </div>
+
+</div>
+<div class="row">
+    <div class="photo-grid">
+        <ul>
+            <li ng-repeat="photo in photos">
+                <a href="">
+                    <img ng-src="http://localhost:8080/{{photo.path}}"/>
+                </a>
+            </li>
+        </ul>
+    </div>
+</div>
+
+<modal title="Login form" visible="showModal">
+    <form role="form" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="profile">Profile picture</label>
+            <input type="file" class="form-control" id="profile" placeholder="Upload an image" />
+        </div>
+        <button type="submit" ng-click="upload()" class="btn btn-default">Upload</button>
+    </form>
+    <form enctype="text/plain" method="post">
+        <div class="form-group">
+            <label for="email">Email</label>
+            <input type="email" class="form-control" id="email" placeholder="Email"  value="{{email}}"/>
+        </div>
+        <div class="form-group">
+            <label for="desc">Description</label>
+            <input type="text" class="form-control" id="desc" placeholder="Enter a description" value="{{desc}}"/>
+        </div>
+        <div class="form-group">
+            <label for="website">Web URL</label>
+            <input type="text" class="form-control" id="website" placeholder="Enter an URL" value="{{website}}" />
+        </div>
+        <button type="submit" ng-click="submit()" class="btn btn-default">Edit Profile</button>
+    </form>
+</modal>

@@ -1,0 +1,23 @@
+
+<div class="row fixWidthRow" ng-show="home.authenticated">
+    <div class="col-md-12">
+        <div ng-repeat="post in home.posts">
+            <div class="post">
+                <div class="profile-picture-holder" >
+                    <img ng-src="/getProfilePicture/{{id}}"/>
+                </div>
+                <p class="post-head"><a href="#/profile/{{post[0]}}">{{post[1]}}</a></p>
+                <p class="date post-head">{{post[4] | date : 'short' }}</p>
+                <img ng-src="http://localhost:8080/{{post[3]}}" />
+                <p class="post-bottom">{{post[5]}}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
