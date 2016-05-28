@@ -1,41 +1,44 @@
-<div class="row">
-    <div class="profile_wrapper">
+<div class="row" ng-show="home.authenticated">
+    <div class="profile_wrapper" ng-cloak>
         <div class="profile_photo_box" id="photo_box">
-            <img ng-src="/getProfilePicture/{{id}}" id="profilePic"/>
+            <img ng-src="/getProfilePicture/{{id}}/" id="profilePic"/>
         </div>
         <div class="user_data_box">
             <div class="first-row">
                 <h2>{{name}}</h2>
-                <div class="edit_btn" ng-click="toggleModal()">EDIT PROFILE</div>
+                <div class="edit_btn" ng-show="{{myProfile}}" ng-click="toggleModal()">EDIT PROFILE</div>
+                <div class="upload_btn" ng-show="{{myProfile}}" ng-click="newPostModal()">UPLOAD</div>
+                <div class="follow_btn" id="followBtn" ng-show="{{!myProfile}}" ng-click="followAction()">{{followBtnTxt}}</div>
+
             </div>
             <div class="second-row">
                 <div class="description">
-                    {{desc}}
-                    <a ng-href="http://{{website}}">{{website}}</a>
+                    <span id="d_desc">{{desc}}</span>
+                    <a ng-href="http://{{website}}" id="d_website">{{website}}</a>
                 </div>
             </div>
             <div class="third-row">
-                <div class="posts_num"><span class="bold">1</span> posts</div>
-                <div class="followers_num"><span class="bold">2</span> followers</div>
-                <div class="following_num"><span class="bold">3</span> following</div>
+                <div class="posts_num"><span class="bold">{{postsCount}}</span> posts</div>
+                <div class="followers_num"><span class="bold">{{followerCount}}</span> followers</div>
+                <div class="following_num"><span class="bold">{{followingCount}}</span> following</div>
             </div>
         </div>
     </div>
 
 </div>
-<div class="row">
+<div class="row" ng-show="home.authenticated">
     <div class="photo-grid">
-        <ul>
-            <li ng-repeat="photo in photos">
+        <ul id="photo-grid-ul">
+            <li ng-repeat="photo in photos | orderBy: dateUpdated:true ">
                 <a href="">
-                    <img ng-src="http://localhost:8080/{{photo.path}}"/>
+                    <img data-postid="{{photo.id}}" ng-click="bigPicture($event)" ng-src="/getPictureForId/{{photo.id}}/"/>
                 </a>
             </li>
         </ul>
     </div>
 </div>
 
-<modal title="Login form" visible="showModal">
+<modal title="Edit Profile" visible="showModal">
     <form role="form" enctype="multipart/form-data">
         <div class="form-group">
             <label for="profile">Profile picture</label>
@@ -46,6 +49,7 @@
     <form enctype="text/plain" method="post">
         <div class="form-group">
             <label for="email">Email</label>
+            <span id="email_error" class="error_label"></span>
             <input type="email" class="form-control" id="email" placeholder="Email"  value="{{email}}"/>
         </div>
         <div class="form-group">
@@ -54,8 +58,31 @@
         </div>
         <div class="form-group">
             <label for="website">Web URL</label>
+            <span id="website_error" class="error_label"></span>
             <input type="text" class="form-control" id="website" placeholder="Enter an URL" value="{{website}}" />
         </div>
         <button type="submit" ng-click="submit()" class="btn btn-default">Edit Profile</button>
     </form>
 </modal>
+
+<modal title="Upload" visible="showNewPostModal">
+    <form role="form" enctype="multipart/form-data">
+        <div class="form-group">
+            <label for="newPhoto">Browse Image</label>
+            <input type="file" class="form-control" id="newPhoto" placeholder="Upload an image" />
+        </div>
+    </form>
+    <form enctype="text/plain" method="post">
+        <div class="form-group">
+            <label for="caption">Caption</label>
+            <input type="text" class="form-control" id="caption" placeholder="Caption" value="{{caption}}"/>
+        </div>
+        <button type="submit" ng-click="postAction()" class="btn btn-default">Upload</button>
+    </form>
+</modal>
+
+<div id="overlay" style="display: none;" ng-click="dissolve($event)">
+    <div id="img_viewer">
+        <img id="bigpicture" src="" />
+    </div>
+</div>

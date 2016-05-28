@@ -13,6 +13,8 @@
     <script type="text/javascript" src="/webjars/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/webjars/angularjs/angular.min.js"></script>
     <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.1/angular-route.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-moment/0.9.0/angular-moment.min.js"></script>
     <script src="js/main.js"></script>
 </head>
 <body ng-app="app" ng-controller="home as home">
@@ -21,14 +23,19 @@
             <div class="col-md-2">
             </div>
             <div class="col-xs-4 col-md-3">
-                <a href="/#/"><h1 class="logo">Onstagram</h1></a>
+                <a href="#/"><h1 class="logo">Onstagram</h1></a>
             </div>
-            <div class="col-xs-4 col-md-3">
-                <input class="searchbar" type="search" placeholder="search" ng-show="home.authenticated"/>
+            <div class="col-xs-4 col-md-3" style="position: relative">
+                <input class="searchbar" id="searchbar" ng-keyup="search($evt)" type="search" placeholder="search" ng-show="home.authenticated"/>
+                <div id="suggestions" ng-cloak>
+                    <ul id="suggestions_ul">
+
+                    </ul>
+                </div>
             </div>
             <div class="col-xs-4 col-md-3 ">
                 <div ng-show="home.authenticated" class="logout-box">
-                    <a href="#/profile/{{home.id}}">{{home.user}} |</a>
+                    <a href="#/profile/{{home.id}}/">{{home.user}} |</a>
                     <a href="" ng-click="home.logout()">Logout</a>
                 </div>
             </div>

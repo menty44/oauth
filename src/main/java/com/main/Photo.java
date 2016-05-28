@@ -11,6 +11,7 @@ import java.util.List;
  * Created by Nagyp on 2016.03.07..
  */
 @Entity
+
 public class Photo implements Serializable{
 
     public Photo(){}

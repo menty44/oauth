@@ -1,33 +1,33 @@
 package com.main;
 
 
-import org.apache.catalina.connector.Connector;
-import org.apache.coyote.http11.AbstractHttp11Protocol;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.ResourceServerProperties;
 import org.springframework.boot.autoconfigure.security.oauth2.resource.UserInfoTokenServices;
-import org.springframework.boot.context.embedded.ConfigurableEmbeddedServletContainer;
-import org.springframework.boot.context.embedded.EmbeddedServletContainerCustomizer;
+import org.springframework.boot.builder.SpringApplicationBuilder;
 import org.springframework.boot.context.embedded.FilterRegistrationBean;
-import org.springframework.boot.context.embedded.tomcat.TomcatConnectorCustomizer;
-import org.springframework.boot.context.embedded.tomcat.TomcatEmbeddedServletContainerFactory;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.annotation.Order;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.oauth2.client.OAuth2ClientContext;
+import org.springframework.security.oauth2.client.OAuth2RestOperations;
 import org.springframework.security.oauth2.client.OAuth2RestTemplate;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientAuthenticationProcessingFilter;
 import org.springframework.security.oauth2.client.filter.OAuth2ClientContextFilter;
 import org.springframework.security.oauth2.client.resource.OAuth2ProtectedResourceDetails;
 import org.springframework.security.oauth2.client.token.grant.code.AuthorizationCodeResourceDetails;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableAuthorizationServer;
 import org.springframework.security.oauth2.config.annotation.web.configuration.EnableOAuth2Client;
-import org.springframework.security.web.access.AccessDeniedHandler;
+import org.springframework.security.oauth2.config.annotation.web.configuration.EnableResourceServer;
+import org.springframework.security.oauth2.config.annotation.web.configuration.ResourceServerConfigurerAdapter;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
 import org.springframework.security.web.csrf.CsrfFilter;
 import org.springframework.security.web.csrf.CsrfToken;
@@ -36,9 +36,6 @@ import org.springframework.security.web.csrf.HttpSessionCsrfTokenRepository;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.filter.CompositeFilter;
 import org.springframework.web.filter.OncePerRequestFilter;
-import org.springframework.web.multipart.commons.CommonsMultipartResolver;
-import org.springframework.web.multipart.support.MultipartFilter;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 import org.springframework.web.util.WebUtils;
 
 import javax.servlet.Filter;
@@ -48,7 +45,6 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.security.Principal;
 import java.util.*;
 
 
@@ -57,6 +53,9 @@ import java.util.*;
 @RestController
 @EnableJpaRepositories
 @Configuration
+@EnableResourceServer
+@EnableAuthorizationServer
+@Order(6)
 public class OauthApplication extends WebSecurityConfigurerAdapter{
 
     @Autowired
@@ -67,7 +66,7 @@ public class OauthApplication extends WebSecurityConfigurerAdapter{
     protected void configure(HttpSecurity http) throws Exception{
         http.antMatcher("/**")
                 .authorizeRequests()
-                .antMatchers("/","/login**","/webjars/**","/home.html")
+                .antMatchers("/","/login**","/webjars/**","/home.html","/profile.html","index.html","/addFbUser")
                 .permitAll()
                 .anyRequest()
                 .authenticated()
@@ -75,7 +74,15 @@ public class OauthApplication extends WebSecurityConfigurerAdapter{
                 .and().csrf().csrfTokenRepository(csrfTokenRepository())
                 .and().addFilterAfter(csrfHeaderFilter(), CsrfFilter.class)
                 .addFilterBefore(ssoFilter(), BasicAuthenticationFilter.class);
+        http.csrf().disable();
     }
+
+    @Override
+    protected void configure(AuthenticationManagerBuilder authenticationManagerBuilder) throws Exception {
+        authenticationManagerBuilder.inMemoryAuthentication().withUser("user").password("secret").roles("ADMIN");
+    }
+
+
 
     private Filter csrfHeaderFilter() {
         return new OncePerRequestFilter() {
@@ -106,28 +113,20 @@ public class OauthApplication extends WebSecurityConfigurerAdapter{
     private Filter ssoFilter(){
         CompositeFilter filter = new CompositeFilter();
         List<Filter> filters = new ArrayList<>();
-
-        OAuth2ClientAuthenticationProcessingFilter facebookFilter = new OAuth2ClientAuthenticationProcessingFilter("/login/facebook");
-        OAuth2RestTemplate facebookTemplate = new OAuth2RestTemplate(facebook(),oAuth2ClientContext);
-        facebookFilter.setRestTemplate(facebookTemplate);
-        facebookFilter.setTokenServices(new UserInfoTokenServices(facebookResource().getUserInfoUri(),facebook().getClientId()));
-        filters.add(facebookFilter);
-
+        filters.add(ssoFilter(facebook(),"/login/facebook"));
         filter.setFilters(filters);
         return filter;
+
     }
 
-    @Bean
-    @ConfigurationProperties("facebook.client")
-    OAuth2ProtectedResourceDetails facebook(){
-        return new AuthorizationCodeResourceDetails();
+    private Filter ssoFilter(ClientResources client,String path){
+        OAuth2ClientAuthenticationProcessingFilter facebookFilter = new OAuth2ClientAuthenticationProcessingFilter(path);
+        OAuth2RestTemplate facebookTemplate = new OAuth2RestTemplate(client.getClient(),oAuth2ClientContext);
+        facebookFilter.setRestTemplate(facebookTemplate);
+        facebookFilter.setTokenServices(new UserInfoTokenServices(client.getResource().getUserInfoUri(),client.getClient().getClientId()));
+        return facebookFilter;
     }
 
-    @Bean
-    @ConfigurationProperties("facebook.resource")
-    ResourceServerProperties facebookResource(){
-        return new ResourceServerProperties();
-    }
 
     @Bean
     public FilterRegistrationBean oauth2ClientFilterRegistration(OAuth2ClientContextFilter filter){
@@ -137,8 +136,37 @@ public class OauthApplication extends WebSecurityConfigurerAdapter{
         return registrationBean;
     }
 
+    @Bean
+    @ConfigurationProperties("facebook")
+    ClientResources facebook(){
+        return new ClientResources();
+    }
+
+
+    @Configuration
+    @EnableResourceServer
+    protected static class ResourceServerConfiguration extends ResourceServerConfigurerAdapter{
+        @Override
+        public void configure(HttpSecurity http) throws Exception{
+            http.antMatcher("/me").authorizeRequests().anyRequest().authenticated();
+        }
+    }
 
     public static void main(String[] args) {
-        SpringApplication.run(OauthApplication.class, args);
+       SpringApplication.run(OauthApplication.class, args);
 	}
 }
+
+class ClientResources{
+    private OAuth2ProtectedResourceDetails client = new AuthorizationCodeResourceDetails();
+    private ResourceServerProperties resource = new ResourceServerProperties();
+
+    public OAuth2ProtectedResourceDetails getClient(){
+        return client;
+    }
+
+    public ResourceServerProperties getResource(){
+        return resource;
+    }
+}
+

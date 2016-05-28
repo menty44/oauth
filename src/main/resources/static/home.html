@@ -1,15 +1,23 @@
 
 <div class="row fixWidthRow" ng-show="home.authenticated">
     <div class="col-md-12">
-        <div ng-repeat="post in home.posts">
-            <div class="post">
+        <div ng-repeat="post in posts">
+            <span style="">{{date()}}</span>
+            <div ng-cloak class="post" id="post-{{ post.photoId}}">
                 <div class="profile-picture-holder" >
-                    <img ng-src="/getProfilePicture/{{id}}"/>
+                    <img ng-cloak ng-src="/getProfilePicture/{{post.id}}/"/>
                 </div>
-                <p class="post-head"><a href="#/profile/{{post[0]}}">{{post[1]}}</a></p>
-                <p class="date post-head">{{post[4] | date : 'short' }}</p>
-                <img ng-src="http://localhost:8080/{{post[3]}}" />
-                <p class="post-bottom">{{post[5]}}</p>
+                <p class="post-head"><a href="#/profile/{{post.id}}/">{{post.name}}</a></p>
+                <p class="date post-head"><time title="{{ main.time | amDateFormat: 'dddd, MMMM Do YYYY, h:mm a' }}" > {{post.uploaded | amCalendar }} </time></p>
+                <img ng-src="getPictureForId/{{post.photoId}}/" />
+                <div class="post-bottom">
+                    <span class="likes" id="likes-{{ post.photoId }}">{{ post.likes }} likes</span>
+                    <br/>
+                    {{post.caption}}
+                    <hr>
+                     <div data-postid="{{ post.photoId }}" id="heart-{{ post.photoId }}" ng-click="setPostLikeById($event)" class="glyphicon glyphicon-heart-empty btn-lg" aria-hidden="true"></div>
+                     <div style="float: right" ng-show="post.belongs"  data-postid="{{ post.photoId }}"  ng-click="removePostById($event)" class="glyphicon glyphicon-trash btn-lg" aria-hidden="true" ></div>
+                </div>
             </div>
         </div>
     </div>

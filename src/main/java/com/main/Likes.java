@@ -1,15 +1,18 @@
 package com.main;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
+import java.io.Serializable;
 import java.util.Date;
 
 /**
  * Created by Nagyp on 2016.03.08..
  */
+
 @Entity
-public class Likes {
+@NamedNativeQueries({
+        @NamedNativeQuery(name = "Likes.findByUserIdAndPostId", resultClass = Likes.class, query = "SELECT * FROM likes WHERE user_id = :id AND photo_id = :postId")
+})
+public class Likes implements Serializable{
 
     @Id
     @GeneratedValue
@@ -48,6 +51,16 @@ public class Likes {
     }
 
     public void setDateLiked(Date dateLiked) {
+        this.dateLiked = dateLiked;
+    }
+
+    public Likes(){
+
+    }
+
+    public Likes(Long userId, long photoId, Date dateLiked){
+        this.userId = userId;
+        this.photoId = photoId;
         this.dateLiked = dateLiked;
     }
 

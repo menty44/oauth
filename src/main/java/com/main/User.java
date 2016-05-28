@@ -1,6 +1,8 @@
 package com.main;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.userdetails.UserDetails;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -11,11 +13,16 @@ import java.util.*;
  */
 @Entity
 @NamedNativeQueries({
-        @NamedNativeQuery(name = "User.getFollowed",resultClass = User.class,query = "SELECT * FROM user LEFT JOIN relationship on relationship.follower = :id WHERE relationship.followed = user.id"),
-        @NamedNativeQuery(name = "User.findByIdIs", query = "SELECT  photo.uploader_Id, user.name, user.profile_picture_path ,photo.path,photo.date_updated,photo.caption FROM user,relationship,photo WHERE relationship.follower = :id AND uploader_id = user.id AND (path <> '' OR path iS NOT NULL) ORDER BY photo.date_updated DESC"),
-        @NamedNativeQuery(name = "User.getFollower",resultClass = User.class,query = "SELECT * FROM user LEFT JOIN relationship on relationship.followed = :id WHERE relationship.follower = user.id\n")
+        @NamedNativeQuery(name = "User.getFollowed",resultClass = User.class, query = "SELECT * FROM user LEFT JOIN relationship on relationship.follower = :id WHERE relationship.followed = user.id"),
+        @NamedNativeQuery(name = "User.findByIdIs", query = "SELECT DISTINCT photo.uploader_Id, user.name, photo.date_updated,photo.caption, photo.id FROM user,relationship,photo WHERE relationship.follower = :id AND (uploader_id = user.id AND (user.id = relationship.followed) AND (path <> '' OR path iS NOT NULL)) OR (uploader_id = :id AND uploader_id = user.id) ORDER BY photo.date_updated DESC"),
+        @NamedNativeQuery(name = "User.getFollower", resultClass = User.class, query = "SELECT * FROM user LEFT JOIN relationship on relationship.followed = :id WHERE relationship.follower = user.id\n"),
+        @NamedNativeQuery(name = "User.getPostsCount", query="SELECT COUNT(id) FROM photo WHERE uploader_id = :id"),
+        @NamedNativeQuery(name = "User.isFollowingId", resultClass = Relationship.class, query = "SELECT DISTINCT * FROM relationship WHERE follower = :id AND followed = :profileid"),
+        @NamedNativeQuery(name = "User.removeRelationship", query = "DELETE FROM relationship WHERE follower = :id AND followed = :profileid"),
+        @NamedNativeQuery(name = "User.findUserByNameLike", query = "SELECT id,name FROM user WHERE name LIKE :keyword")
+
 })
-public class User implements Serializable {
+public class User implements Serializable, UserDetails {
 
     @Id
     @GeneratedValue
@@ -29,7 +36,6 @@ public class User implements Serializable {
     public String website;
 
     public String profilePicturePath;
-
 
     @OneToMany(mappedBy = "uploader")
     @JsonManagedReference
@@ -128,4 +134,46 @@ public class User implements Serializable {
         this.setFollowing(new ArrayList<>());
     }
 
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        Collection<GrantedAuthority> grantedAuthorities = new ArrayList<GrantedAuthority>();
+        GrantedAuthority grantedAuthority = new GrantedAuthority() {
+            @Override
+            public String getAuthority() {
+                return "ROLE_USER";
+            }
+        };
+        grantedAuthorities.add(grantedAuthority);
+        return grantedAuthorities;
+    }
+
+    @Override
+    public String getPassword() {
+        return facebookId.toString();
+    }
+
+    @Override
+    public String getUsername() {
+        return name.replaceAll("\\s+","");
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return false;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return false;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

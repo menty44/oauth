@@ -1,33 +1,29 @@
 package com.main;
 
+import org.hibernate.validator.internal.util.privilegedactions.GetMethod;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.annotation.PropertySources;
 import org.springframework.http.*;
-import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
-import org.springframework.stereotype.Controller;
 import org.springframework.util.FileCopyUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.multipart.MultipartResolver;
-import org.springframework.web.servlet.ModelAndView;
 
-import javax.imageio.ImageIO;
-import javax.servlet.annotation.MultipartConfig;
-import javax.servlet.http.HttpServletRequest;
-import java.awt.image.BufferedImage;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.security.Principal;
+import java.util.*;
 
 @RestController
 @PropertySources(value = {@PropertySource("classpath:application.properties")})
@@ -43,7 +39,8 @@ class UserRestController{
     @Autowired
     private MultipartResolver multipartResolver;
 
-    @RequestMapping({"/user","/me"})
+
+    @RequestMapping({"/user"})
     public HashMap user(OAuth2Authentication principal){
 
         LinkedHashMap o = (LinkedHashMap) principal.getUserAuthentication().getDetails();
@@ -63,55 +60,20 @@ class UserRestController{
             result.setName(name);
             result.setFacebookId(facebookTokenId);
             result.setDateRegistered(new Date());
-
-            User doe = new User();
-            doe.setName("Peti");
-            doe.setFacebookId(Long.valueOf(111).longValue());
-            doe.setDateRegistered(new Date());
-            doe.setProfilePicturePath("images/3.jpeg");
-
-            Photo photo = new Photo();
-            photo.setDateUpdated(new Date());
-            photo.setCaption("nice photo");
-            photo.setPath("images/1.jpg");
-            photoRepository.save(photo);
-
-            Photo photo2 = new Photo();
-            photo.setDateUpdated(new Date());
-            photo.setCaption("nice photo");
-            photo.setPath("images/2.jpg");
-            photoRepository.save(photo2);
-
-            doe.getPhotos().add(photo);
-            doe.getPhotos().add(photo2);
-            userRepositroy.save(doe);
-            photo.setUploader(doe);
-            photo2.setUploader(doe);
-            photoRepository.save(photo);
-            photoRepository.save(photo2);
-
-
             userRepositroy.save(result);
-            Relationship rel =  new Relationship();
-            rel.setFollowed(doe);
-            rel.setFollower(result);
-            relationshipRepository.save(rel);
-            result = userRepositroy.findByFacebookId(facebookTokenId);
-            result.getFollowing().add(rel);
-
-            User harmadik = new User();
-            harmadik.setName("John Doe");
-            harmadik.setDateRegistered(new Date());
-            harmadik.setFacebookId((long)112233);
-            userRepositroy.save(harmadik);
-            result = userRepositroy.findByFacebookId(facebookTokenId);
-            result.getFollowing().add(rel);
 
         }
 
         HashMap<String,Object> map = new LinkedHashMap();
         map.put("name",name);
         map.put("id",result.getId());
+        return map;
+    }
+
+    @RequestMapping({"/me"})
+    public Map<String,String> user(Principal principal){
+        Map<String,String> map = new LinkedHashMap<>();
+        map.put("name",principal.getName());
         return map;
     }
 
@@ -123,12 +85,37 @@ class UserRestController{
         return new ResponseEntity<>(newUser, HttpStatus.OK);
     }
 
+    @RequestMapping(value = "/addFbUser",method = RequestMethod.POST)
+    HashMap<String,Object> addFbUser(@RequestParam("id") String id,@RequestParam("name") String name){
+        HashMap<String,Object> map = new LinkedHashMap();
+        Long uid = Long.valueOf(id);
+        User existingUser = userRepositroy.findByFacebookId(uid);
+        if (existingUser == null) {
+            existingUser = new User();
+            existingUser.setFacebookId(uid);
+            existingUser.setName(name);
+            userRepositroy.save(existingUser);
+        }
+
+        Authentication auth = new UsernamePasswordAuthenticationToken(existingUser,null,existingUser.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
+        userRepositroy.save(existingUser);
+
+        map.put("name",existingUser.getName());
+        map.put("id",existingUser.getId());
+        return map;
+    }
+
     @RequestMapping(value = "/getProfilePicture/{id}",method = RequestMethod.GET)
     public HttpEntity<byte[]> getSingleProfilePicture(@PathVariable String id, WebRequest request) throws IOException{
         User usr = userRepositroy.getOne(Long.valueOf(id));
+        String name = null;
+        try{
+             name = usr.getProfilePicturePath().split("/")[2];
 
-        String name = usr.getProfilePicturePath().split("/")[2];
-        System.out.println(name);
+        }catch (Exception e){
+            name = "default.png";
+        }
         File photo = new File("images",name);
         if (!photo.exists()){
             System.out.print("Photo not found");
@@ -136,7 +123,7 @@ class UserRestController{
 
         if (request.checkNotModified(photo.lastModified()))
             return null;
-        System.out.print(photo.getPath());
+
         byte[] photoFile = Files.readAllBytes(Paths.get(photo.getPath()));
         HttpHeaders headers = new HttpHeaders();
         headers.setContentLength(photoFile.length);
@@ -146,7 +133,8 @@ class UserRestController{
     }
 
     @RequestMapping(value = "uploadProfilePicture/{id}",method = RequestMethod.POST)
-    public void saveSingleProfileImage(@PathVariable String id,@RequestParam("name") String name,@RequestParam("img") MultipartFile file){
+    public HashMap<String,Boolean> saveSingleProfileImage(@PathVariable String id,@RequestParam("name") String name,@RequestParam("img") MultipartFile file){
+        HashMap<String,Boolean> map = new LinkedHashMap<>();
         if(!file.isEmpty()){
             try{
                 BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(new File("images/"+name)));
@@ -156,26 +144,112 @@ class UserRestController{
                 User usr = userRepositroy.findOne(Long.valueOf(id));
                 usr.setProfilePicturePath("/images/"+name);
                 userRepositroy.save(usr);
-                System.out.print("Uploaded & saved");
+                map.put("success",true);
+            }catch (Exception e){
+                System.out.println(e.getMessage());
+                map.put("success",false);
+            }
+        }else{
+            System.out.print("Empty file");
+            map.put("success",false);
+        }
+        return map;
+    }
+
+    @RequestMapping(value = "updateProfile/{id}",method = RequestMethod.POST)
+    public HashMap<String,Object> updateProfile(@PathVariable String id,@RequestParam("email") String email,@RequestParam("desc") String desc,@RequestParam("website") String weburl){
+        HashMap<String,Object> map = new LinkedHashMap<>();
+        User usr = userRepositroy.findOne(Long.valueOf(id));
+
+        if(Validation.ValidateEmpty(email) == Validation.ErrorType.OK){
+            if(Validation.ValidateEmail(email) == Validation.ErrorType.OK)
+                usr.setEmail(email);
+            else
+                map.put("email_error","The given string is not an email address");
+        }
+        if(Validation.ValidateEmpty(desc) == Validation.ErrorType.OK) {
+            usr.setDescription(desc);
+        }
+        if(Validation.ValidateEmpty(weburl) == Validation.ErrorType.OK){
+            if(Validation.ValidateWebsite(weburl) == Validation.ErrorType.OK)
+                usr.setWebsite(weburl);
+            else
+                map.put("website_error","The given url is not a web url");
+        }
+        userRepositroy.save(usr);
+        map.put("success",true);
+        return map;
+    }
+
+    @RequestMapping(value = "uploadPicture/{id}", method = RequestMethod.POST)
+    public HashMap<String,Long> uploadPicture(@PathVariable String id,@RequestParam("name") String name,@RequestParam("caption") String caption,@RequestParam("image") MultipartFile img){
+        HashMap<String,Long> map = new LinkedHashMap<>();
+        if(!img.isEmpty()){
+            try{
+                int i = 0;
+                String filename = "images/"+name;
+                File file = new File(filename);
+                while (file.exists()){
+                    i++;
+                    filename = "images/" +  Integer.toString(i) + name;
+                    file = new File(filename);
+                }
+                BufferedOutputStream stream = new BufferedOutputStream(new FileOutputStream(file));
+                FileCopyUtils.copy(img.getInputStream(),stream);
+                stream.close();
+                User usr = userRepositroy.findOne(Long.valueOf(id));
+                Photo p = new Photo();
+                p.setUploader(usr);
+                p.setCaption(caption);
+                p.setDateUpdated(new Date());
+                p.setPath(filename);
+                photoRepository.save(p);
+                usr.getPhotos().add(p);
+                userRepositroy.save(usr);
+                map.put("id",p.getId());
+
             }catch (Exception e){
                 System.out.println(e.getMessage());
             }
         }else{
             System.out.print("Empty file");
         }
+        return map;
     }
 
-    @RequestMapping(value = "updateProfile/{id}",method = RequestMethod.POST)
-    public void updateProfile(@PathVariable String id,@RequestParam("email") String email,@RequestParam("desc") String desc,@RequestParam String weburl){
+    @RequestMapping(value = "getPictureForId/{id}", method = RequestMethod.GET)
+    public HttpEntity<byte[]> getPictureForId(@PathVariable String id, WebRequest request) throws IOException {
 
-        User usr = userRepositroy.findOne(Long.valueOf(id));
-        if(!email.isEmpty())
-            usr.setEmail(email);
-        if(!desc.isEmpty())
-            usr.setDescription(desc);
-        if(!weburl.isEmpty())
-            usr.setWebsite(weburl);
-        userRepositroy.save(usr);
+        String name = null;
+        Photo img = photoRepository.findOne(Long.valueOf(id));
+        try{
+            name = img.getPath().split("/")[1];
+        }catch (Exception e){
+            name = "2.jpg";
+        }
+        File photo = new File("images",name);
+        if (!photo.exists()){
+            System.out.print("Photo not found");
+        }
+
+        if (request.checkNotModified(photo.lastModified()))
+            return null;
+
+        byte[] photoFile = Files.readAllBytes(Paths.get(photo.getPath()));
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentLength(photoFile.length);
+        headers.setLastModified(photo.lastModified());
+        return new HttpEntity<byte[]>(photoFile,headers);
+    }
+
+    @RequestMapping(value = "/search/{keyword}",method = RequestMethod.GET)
+    public Object search(@PathVariable String keyword){
+
+        if(!keyword.isEmpty()) {
+            List<HashMap<Long,String>> obj = userRepositroy.findUserByNameLike("%" + keyword + "%");
+            return obj;
+        }
+        return null;
     }
 
 

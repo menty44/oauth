@@ -2,7 +2,6 @@ package com.main;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 
-import javax.jws.soap.SOAPBinding;
 import javax.persistence.*;
 import java.io.Serializable;
 
