@@ -1,0 +1,352 @@
+
+body{
+    margin: 0;
+    padding: 0;
+    background: #fbfbfb;
+}
+
+
+.splash_wrapper{
+    width: 1000px;
+    margin: 0 auto;
+}
+
+.login-box{
+    display: inline-block;
+}
+
+.login-box p{
+    padding-left: 30px;
+    font-size: 1.2em;
+    font-weight: 500;
+}
+
+.fixWidthRow{
+    width: 1000px;
+    margin: 0 auto;
+}
+
+.fixWidthRow img{
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.post{
+    width: 600px;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    -moz-border-radius: 6px;
+    -webkit-border-radius: 6px;
+    margin: 0 auto;
+    margin-top: 50px;
+}
+
+.post .post-head{
+    margin: 0;
+    display: inline-block;
+    padding: 15px 0;
+}
+
+.post .post-bottom{
+    padding:10px;
+    margin: 0;
+}
+
+.likes{
+    font-weight:bold;
+    color: #848484;
+}
+
+.btn-lg{
+    padding: 10px;
+}
+
+.glyphicon-heart-empty:hover{
+    cursor: pointer;
+}
+
+.glyphicon-trash:hover{
+    cursor: pointer;
+}
+
+.heart-liked{
+    color: #ff3643;
+}
+
+hr{
+    margin-bottom: 10px;
+}
+
+.post p.date{
+    float: right;
+    margin-right: 10px;
+    color: #848484;
+}
+
+.profile-picture-holder{
+    float: left;
+    padding: 10px;
+}
+
+.profile-picture-holder img,#suggestions img{
+    max-width: 30px;
+    border-radius: 50%;
+}
+
+.heading{
+    border-bottom: 1px solid #eee;
+    background: white;
+}
+
+h1.logo{
+    margin-top: 10px;
+    color:#125688;
+    font-size: 26px;
+    padding: 8px;
+}
+
+a{
+    color:#125688;
+    font-weight: bold;
+}
+
+a:hover{
+    text-decoration: none;
+}
+
+.searchbar{
+    width: 200px;
+    border-radius: 15px;
+    -moz-border-radius: 15px;
+    -webkit-border-radius: 15px;
+    border: solid 1px #edeeee;
+    outline: none;
+    height: 30px;
+    padding-left: 10px;
+    margin-left: -10px;
+    margin-top: 17px;
+    font-weight: 200;
+    color: #b2b2b2;
+}
+
+.logout-box a{
+    display: inline-block;
+    float: left;
+    margin-left: 5px;
+    margin-top: 22px;
+}
+
+/*Profile*/
+
+.profile_wrapper{
+    width: 975px;
+    margin: 0 auto;
+}
+
+.profile_photo_box{
+    margin-top: 50px;
+    width:30%;
+    float: left;
+}
+
+.profile_photo_box img {
+    margin-left: 80px;
+    margin-top: 20px;
+    border-radius: 50%;
+    max-width: 130px;
+}
+.user_data_box{
+    width: 70%;
+    margin-top: 50px;
+    float: right;
+    color: #4b4f54;
+}
+
+.user_data_box h2{
+    font-weight: 300;
+    font-size: 2.3em;
+    display: inline-block;
+    margin: 0;
+    vertical-align: middle;
+}
+
+.user_data_box .edit_btn,.user_data_box .follow_btn,.upload_btn{
+    font-size: 0.9em;
+    display: inline-block;
+    padding: 5px;
+    border: 1px solid #95989c;
+    border-radius: 4px;
+    color:#95989c;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    margin-left: 20px;
+    margin-top: 4px;
+    vertical-align: middle;
+    font-weight: 500;
+}
+
+
+.user_data_box .edit_btn:hover,.user_data_box .follow_btn:hover,.upload_btn:hover{
+    color: #333;
+    cursor: pointer;
+}
+
+.btn_unfollow{
+    font-size: 0.9em;
+    display: inline-block;
+    padding: 5px;
+    border: 0;
+    border-radius: 4px;
+    color:white;
+    background: #68d135;
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    margin-left: 20px;
+    margin-top: 4px;
+    vertical-align: middle;
+    font-weight: 500;
+}
+
+.btn_unfollow:hover{
+    background: #5cb72f;
+    cursor: pointer;
+}
+
+.btn-default{
+    margin-bottom: 10px;
+}
+
+.second-row{
+    font-size: 1.2em;
+    margin-top: 12px;
+}
+
+.third-row div{
+    display: inline-block;
+    font-size: 1.15em;
+    margin-right: 25px;
+    margin-top: 13px;
+}
+
+.bold{
+    font-weight: 500;
+    font-size: 1.2em;
+}
+
+.photo-grid {
+    width: 1000px;
+    margin: 40px auto 0 auto;
+}
+
+.photo-grid ul{
+    padding: 0.25em;
+    overflow: hidden;
+    list-style: none;
+    margin: 0 auto;
+    margin-left: 15px;
+}
+
+.photo-grid ul li{
+    float: left;
+    height: 300px;
+    width: 300px;
+    overflow: hidden;
+    margin: 0 30px 30px 0;
+}
+
+.photo-grid ul li a{
+
+}
+
+.photo-grid img{
+    display: inline-block;
+    max-width: 300px;
+}
+
+.photo-grid ul li:nth-child(3n) {
+    margin-right:0;
+}
+
+.impressum{
+    width: 1000px;
+    margin: 10px auto;
+    font-weight: 500;
+    text-align: center;
+    font-size: 0.8em;
+}
+
+.willnotrender {
+    transform: translateZ(0);
+}
+
+[ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+    display: none !important;
+}
+
+#img_viewer{
+    width: 600px;
+    background: black;
+    position: absolute;
+    left: 50%;
+    margin-left: -300px;
+}
+
+#img_viewer img{
+    max-width: 600px;
+}
+
+#overlay{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.4);
+    top:0;
+    left: 0;
+}
+
+#suggestions{
+    position: absolute;
+    width: 200px;
+    top:48px;
+    left: 5px;
+    background: white;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    z-index: 10;
+    display: none;
+}
+
+#suggestions ul{
+    margin: 0;
+    padding: 0;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+    -webkit-box-shadow: 0px 0px 7px -1px rgba(189,185,189,1);
+    -moz-box-shadow: 0px 0px 7px -1px rgba(189,185,189,1);
+    box-shadow: 0px 0px 7px -1px rgba(189,185,189,1);
+    list-style: none;
+}
+
+#suggestions ul a{
+    color:#125688;
+    font-weight: 400;
+    text-decoration: none;
+}
+
+#suggestions ul a li{
+    padding: 10px;
+    border-bottom: 1px solid #edeeef;
+}
+
+#suggestions ul a:last-child li{
+    border-bottom: none;
+    border-bottom-left-radius: 3px;
+    border-bottom-right-radius: 3px;
+
+}
+
+#suggestions img{
+    margin-right: 10px;
+}
+
+.error_label{
+    color:red;
+}

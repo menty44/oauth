@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
+    <title>Onstagram</title>
+    <meta name="description" content=""/>
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+    <base href="/"/>
+    <link rel="stylesheet" type="text/css" href="/webjars/bootstrap/css/bootstrap.min.css"/>
+    <link rel="stylesheet" type="text/css" href="css/main.css"/>
+    <script type="text/javascript" src="/webjars/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/webjars/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/webjars/angularjs/angular.min.js"></script>
+    <script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.1/angular-route.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.9.0/moment.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-moment/0.9.0/angular-moment.min.js"></script>
+    <script src="js/main.js"></script>
+</head>
+<body ng-app="app" ng-controller="home as home">
+    <div class="container-fluid">
+        <div class="row heading">
+            <div class="col-md-2">
+            </div>
+            <div class="col-xs-4 col-md-3">
+                <a href="#/"><h1 class="logo">Onstagram</h1></a>
+            </div>
+            <div class="col-xs-4 col-md-3" style="position: relative">
+                <input class="searchbar" id="searchbar" ng-keyup="search($evt)" type="search" placeholder="search" ng-show="home.authenticated"/>
+                <div id="suggestions" ng-cloak>
+                    <ul id="suggestions_ul">
+
+                    </ul>
+                </div>
+            </div>
+            <div class="col-xs-4 col-md-3 ">
+                <div ng-show="home.authenticated" class="logout-box">
+                    <a href="#/profile/{{home.id}}/">{{home.user}} |</a>
+                    <a href="" ng-click="home.logout()">Logout</a>
+                </div>
+            </div>
+            <div class="col-md-2">
+            </div>
+        </div>
+        <div ng-view></div>
+        <div ng-show="!home.authenticated" class="splash_wrapper">
+            <img src="images/splash.png"/>
+            <div class="login-box">
+                <p>WELCOME TO ONSTAGRAM</p>
+                <a href="/login/facebook"><img src="images/fblogin.png"/></a>
+            </div>
+        </div>
+
+        <div class="impressum">
+            2016 PETER NAGY
+        </div>
+    </div>
+</body>
+</html>

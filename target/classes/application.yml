@@ -1,0 +1,29 @@
+facebook:
+  client:
+    clientId: 1596427550683712
+    clientSecret: 8db4868e214942c543ad1ca0538515a6
+    accessTokenUri: https://graph.facebook.com/oauth/access_token
+    userAuthorizationUri: https://www.facebook.com/dialog/oauth
+    tokenName: oauth_token
+    authenticationScheme: query
+    clientAuthenticationScheme: form
+  resource:
+    userInfoUri: https://graph.facebook.com/me
+
+
+security:
+  oauth2:
+    resource:
+      user-info-uri:  http://localhost:8080/me
+    client:
+      client-id: onlab
+      client-secret: onlabsecret
+      scope: read,write
+      authorized-grant-types: authorization_code,refresh_token, password,client_credentials
+      auto-approve-scopes: '.*'
+      access-token-uri: http://localhost:8080/oauth/token
+      user-authorization-uri: http://localhost:8080/oauth/authorize
+
+multipart:
+  max-file-size: 10Mb
+  max-request-size: 10Mb
