@@ -64,5 +64,4 @@ public class Validation {
         else
             return ErrorType.NOT_VALID;
     }
-
 }

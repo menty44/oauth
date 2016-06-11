@@ -64,5 +64,4 @@ public class Likes implements Serializable{
         this.dateLiked = dateLiked;
     }
 
-
 }

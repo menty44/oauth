@@ -259,5 +259,4 @@ class UserRestController{
         this.photoRepository = photoRepository;
         this.relationshipRepository = relationshipRepository;
     }
-
 }

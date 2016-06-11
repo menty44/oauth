@@ -20,3 +20,4 @@ public class ErrorJson {
         this.trace = (String) errorAttributes.get("trace");
     }
 }
+

@@ -61,7 +61,6 @@ public class OauthApplication extends WebSecurityConfigurerAdapter{
     @Autowired
     OAuth2ClientContext oAuth2ClientContext;
 
-
     @Override
     protected void configure(HttpSecurity http) throws Exception{
         http.antMatcher("/**")

@@ -1,6 +1,5 @@
 var app = angular.module("app",['ngRoute','angularMoment']);
 
-
 /**
  *  Controller for user authentication webservice calls, and non controller specific methods
  */

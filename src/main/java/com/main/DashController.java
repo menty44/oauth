@@ -168,7 +168,6 @@ class DashController {
         return map;
     }
 
-
     @RequestMapping(value = "/followAction/{profileId}",method = RequestMethod.GET)
     public Map<String,String> followAction( @PathVariable Long id,@PathVariable long profileId){
         HashMap<String,String> map = new LinkedHashMap<>();

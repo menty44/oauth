@@ -50,6 +50,5 @@ public class Relationship implements Serializable {
     }
 
     public Relationship(){
-
     }
 }

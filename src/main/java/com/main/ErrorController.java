@@ -36,5 +36,4 @@ public class ErrorController implements org.springframework.boot.autoconfigure.w
         RequestAttributes requestAttributes = new ServletRequestAttributes(request);
         return errorAttributes.getErrorAttributes(requestAttributes,false);
     }
-
 }
