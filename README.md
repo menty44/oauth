@@ -22,5 +22,5 @@ Webservice: JSON
 
 
 
-A youtube video shwoing some functionality:
+A youtube video showing some functionality:
 https://www.youtube.com/watch?v=eL1InVsdErs
